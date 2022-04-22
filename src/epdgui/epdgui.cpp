@@ -46,13 +46,26 @@ void EPDGUI_Clear(void)
 
 void EPDGUI_Run(void *pargs)
 {
-    uint32_t last_active_time = 0;
-
     EPDGUI_Draw(UPDATE_MODE_NONE);
     M5.EPD.UpdateFull(UPDATE_MODE_GC16);
 
     while (1)
     {
+        M5.update();
+
+        if (M5.BtnP.isPressed())
+        {
+            log_d("Now the system is shutting down.");
+            M5.EPD.Clear();
+            M5.EPD.UpdateFull(UPDATE_MODE_GC16);
+            M5.EPD.UpdateFull(UPDATE_MODE_GC16);
+            M5.disableEPDPower();
+            M5.disableEXTPower();
+            M5.disableMainPower();
+            esp_deep_sleep_start();
+            while(1);
+        }
+
         if (M5.TP.avaliable())
         {
             M5.TP.update();

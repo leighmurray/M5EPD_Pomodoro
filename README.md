@@ -10,5 +10,8 @@ Reset -> reset timer.
 
 Reset when timer is already reset -> reset tomato counter.
 
+Press in side button (G38) to power off.
+
+Press in side button (G38) for 2-3 seconds to power on.
 
 ![EPD Pomodoro Photo](M5EPD_Pomodoro.jpg?raw=true)
