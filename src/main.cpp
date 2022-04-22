@@ -47,10 +47,19 @@ void updateTomatoCounter()
     tomato_counter.drawString("Tomatoes: " + String(completed_tomatoes), 260, 60);
 
     tomato_counter.setTextSize(32);
-    tomato_counter.drawString(String(M5.getBatteryRaw()/24) + "%", 520, 24);
 
+    uint32_t batteryVoltageMV = M5.getBatteryVoltage();
+    String batteryText;
+    if (batteryVoltageMV > 4300) {
+        batteryText = "USB";
+    }
+    else {
+        uint32_t batteryPercentageClamped = constrain((batteryVoltageMV - 3500)/6, 0, 100);
+        batteryText = String(batteryPercentageClamped) + "%";
+    }
+
+    tomato_counter.drawString(batteryText, 520, 24);
     tomato_counter.pushCanvas(0, 0, UPDATE_MODE_NONE);
-    M5.EPD.UpdateFull(UPDATE_MODE_GL16);
 }
 
 void resetCompletedTomatoes()
@@ -81,7 +90,7 @@ void stopTimer()
 {
     countdownTimer.detach();
     btns[KEY_START]->setLabel("START");
-    btns[KEY_START]->Draw();
+    btns[KEY_START]->Draw(UPDATE_MODE_GLR16);
 }
 
 void resetTimer()
@@ -107,19 +116,25 @@ void startTimer()
 {
     if (timer_seconds == 0) {
         resetTimer();
+        M5.EPD.UpdateFull(UPDATE_MODE_GL16);
     }
-    btns[KEY_START]->setLabel("STOP");
-    btns[KEY_START]->Draw();
+    btns[KEY_START]->setLabel("PAUSE");
+    btns[KEY_START]->Draw(UPDATE_MODE_GLR16);
     countdownTimer.attach(1, decreaseCountdownTimer);
 }
 
 void onResetTimerPress(epdgui_args_vector_t &args)
 {
-    if (timer_seconds == TIMER_DURATION)
+    // gotta check this first because it gets reset in "resetTimer"
+    bool resetTomatoes = timer_seconds == TIMER_DURATION;
+
+    resetTimer();
+
+    if (resetTomatoes)
     {
         resetCompletedTomatoes();
+        M5.EPD.UpdateFull(UPDATE_MODE_GL16);
     }
-    resetTimer();
 }
 
 void onStartTimerPress(epdgui_args_vector_t &args)
@@ -174,6 +189,7 @@ void setup()
     tomato_counter.createCanvas(540, 120);
     tomato_counter.loadFont(binaryttf, sizeof(binaryttf));
     tomato_counter.createRender(36, 14);
+
     for(int i = DEFAULT_FONT_SIZE; i >= 8; i-= 8)
     {
         tomato_counter.createRender(i, 14);
