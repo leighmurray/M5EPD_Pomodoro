@@ -77,30 +77,15 @@ void EPDGUI_Run(void *pargs)
                 if(is_finger_up)
                 {
                     EPDGUI_Process();
-                    last_active_time = millis();
                 }
                 else
                 {
                     EPDGUI_Process(M5.TP.readFingerX(0), M5.TP.readFingerY(0));
-                    last_active_time = 0;
                 }
             }
 
             M5.TP.flush();
         }
-
-        // if((last_active_time != 0) && (millis() - last_active_time > 2000))
-        // {
-        //     if(M5.EPD.UpdateCount() > 4)
-        //     {
-        //         M5.EPD.ResetUpdateCount();
-        //         if(_is_auto_update)
-        //         {
-        //             M5.EPD.UpdateFull(UPDATE_MODE_GL16);
-        //         }
-        //     }
-        //     last_active_time = 0;
-        // }
     }
 }
 
