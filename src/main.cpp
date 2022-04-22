@@ -50,7 +50,7 @@ void updateTomatoCounter()
 
     uint32_t batteryVoltageMV = M5.getBatteryVoltage();
     String batteryText;
-    if (batteryVoltageMV > 4300) {
+    if (batteryVoltageMV > 4250) {
         batteryText = "USB";
     }
     else {
@@ -90,7 +90,7 @@ void stopTimer()
 {
     countdownTimer.detach();
     btns[KEY_START]->setLabel("START");
-    btns[KEY_START]->Draw(UPDATE_MODE_GLR16);
+    btns[KEY_START]->Draw();
 }
 
 void resetTimer()
@@ -114,12 +114,17 @@ void decreaseCountdownTimer()
 
 void startTimer()
 {
+    btns[KEY_START]->setLabel("PAUSE");
     if (timer_seconds == 0) {
         resetTimer();
         M5.EPD.UpdateFull(UPDATE_MODE_GL16);
     }
-    btns[KEY_START]->setLabel("PAUSE");
-    btns[KEY_START]->Draw(UPDATE_MODE_GLR16);
+    else {
+        btns[KEY_START]->Draw();
+    }
+
+
+
     countdownTimer.attach(1, decreaseCountdownTimer);
 }
 
