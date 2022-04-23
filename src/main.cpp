@@ -34,7 +34,7 @@ void updateValue()
     canvas_result.setTextSize(DEFAULT_FONT_SIZE);
     canvas_result.drawString(timer_str, 512, 272);
 
-    canvas_result.pushCanvas(0, 256, UPDATE_MODE_DU);
+    canvas_result.pushCanvas(0, 270, UPDATE_MODE_DU);
 }
 
 void updateTomatoCounter()
@@ -44,7 +44,7 @@ void updateTomatoCounter()
     tomato_counter.setTextSize(64);
     tomato_counter.setTextColor(0,11);
 
-    tomato_counter.drawString("Tomatoes: " + String(completed_tomatoes), 260, 60);
+    tomato_counter.drawString("Tomatoes: " + String(completed_tomatoes), 260, 65);
 
     tomato_counter.setTextSize(32);
 
@@ -123,8 +123,6 @@ void startTimer()
         btns[KEY_START]->Draw();
     }
 
-
-
     countdownTimer.attach(1, decreaseCountdownTimer);
 }
 
@@ -191,7 +189,7 @@ void setup()
     }
     canvas_result.setTextDatum(BR_DATUM);
 
-    tomato_counter.createCanvas(540, 120);
+    tomato_counter.createCanvas(540, 130);
     tomato_counter.loadFont(binaryttf, sizeof(binaryttf));
     tomato_counter.createRender(36, 14);
 
