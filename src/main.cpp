@@ -105,7 +105,7 @@ void stopTimer()
 {
     countdownTimer.detach();
     btns[KEY_START]->setLabel("START");
-    btns[KEY_START]->Draw();
+    btns[KEY_START]->Draw(UPDATE_MODE_GL16);
 }
 
 void resetTimer(bool updateCanvas = false)
