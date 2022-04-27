@@ -14,7 +14,7 @@ enum
 
 #define DEFAULT_FONT_SIZE 200
 
-#define TIMER_DURATION 900
+#define TIMER_DURATION 600
 
 EPDGUI_Button *btns[2];
 M5EPD_Canvas canvas_result(&M5.EPD);
@@ -60,6 +60,7 @@ void updateTomatoCounter()
 
     tomato_counter.drawString(batteryText, 520, 24);
     tomato_counter.pushCanvas(0, 0, UPDATE_MODE_NONE);
+    M5.EPD.UpdateFull(UPDATE_MODE_GL16);
 }
 
 void resetCompletedTomatoes()
@@ -136,7 +137,6 @@ void onResetTimerPress(epdgui_args_vector_t &args)
     if (resetTomatoes)
     {
         resetCompletedTomatoes();
-        M5.EPD.UpdateFull(UPDATE_MODE_GL16);
     }
 }
 
