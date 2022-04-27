@@ -46,46 +46,40 @@ void EPDGUI_Clear(void)
 
 void EPDGUI_Run(void *pargs)
 {
-    EPDGUI_Draw(UPDATE_MODE_NONE);
-    M5.EPD.UpdateFull(UPDATE_MODE_GC16);
+    M5.update();
 
-    while (1)
+    if (M5.BtnP.isPressed())
     {
-        M5.update();
+        log_d("Now the system is shutting down.");
+        M5.EPD.Clear();
+        M5.EPD.UpdateFull(UPDATE_MODE_GC16);
+        M5.EPD.UpdateFull(UPDATE_MODE_GC16);
+        M5.disableEPDPower();
+        M5.disableEXTPower();
+        M5.disableMainPower();
+        esp_deep_sleep_start();
+        while(1);
+    }
 
-        if (M5.BtnP.isPressed())
+    if (M5.TP.avaliable())
+    {
+        M5.TP.update();
+        bool is_finger_up = M5.TP.isFingerUp();
+        if(is_finger_up || (_last_pos_x != M5.TP.readFingerX(0)) || (_last_pos_y != M5.TP.readFingerY(0)))
         {
-            log_d("Now the system is shutting down.");
-            M5.EPD.Clear();
-            M5.EPD.UpdateFull(UPDATE_MODE_GC16);
-            M5.EPD.UpdateFull(UPDATE_MODE_GC16);
-            M5.disableEPDPower();
-            M5.disableEXTPower();
-            M5.disableMainPower();
-            esp_deep_sleep_start();
-            while(1);
-        }
-
-        if (M5.TP.avaliable())
-        {
-            M5.TP.update();
-            bool is_finger_up = M5.TP.isFingerUp();
-            if(is_finger_up || (_last_pos_x != M5.TP.readFingerX(0)) || (_last_pos_y != M5.TP.readFingerY(0)))
+            _last_pos_x = M5.TP.readFingerX(0);
+            _last_pos_y = M5.TP.readFingerY(0);
+            if(is_finger_up)
             {
-                _last_pos_x = M5.TP.readFingerX(0);
-                _last_pos_y = M5.TP.readFingerY(0);
-                if(is_finger_up)
-                {
-                    EPDGUI_Process();
-                }
-                else
-                {
-                    EPDGUI_Process(M5.TP.readFingerX(0), M5.TP.readFingerY(0));
-                }
+                EPDGUI_Process();
             }
-
-            M5.TP.flush();
+            else
+            {
+                EPDGUI_Process(M5.TP.readFingerX(0), M5.TP.readFingerY(0));
+            }
         }
+
+        M5.TP.flush();
     }
 }
 

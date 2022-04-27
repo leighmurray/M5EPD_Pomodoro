@@ -14,7 +14,7 @@ enum
 
 #define DEFAULT_FONT_SIZE 200
 
-#define TIMER_DURATION 600
+uint32_t timer_duration = 600;
 
 EPDGUI_Button *btns[2];
 M5EPD_Canvas canvas_result(&M5.EPD);
@@ -27,14 +27,27 @@ int input_font_size = DEFAULT_FONT_SIZE;
 
 Ticker countdownTimer;
 
-void updateValue()
+void increaseTimerDuration()
+{
+    timer_duration += 60;
+}
+
+void decreaseTimerDuration()
+{
+    if (timer_duration > 60)
+    {
+        timer_duration -= 60;
+    }
+}
+
+void updateValue(bool updateCanvas = true)
 {
     canvas_result.fillCanvas(0);
 
     canvas_result.setTextSize(DEFAULT_FONT_SIZE);
     canvas_result.drawString(timer_str, 512, 272);
 
-    canvas_result.pushCanvas(0, 270, UPDATE_MODE_DU);
+    canvas_result.pushCanvas(0, 270, updateCanvas ? UPDATE_MODE_DU : UPDATE_MODE_NONE);
 }
 
 void updateTomatoCounter()
@@ -42,7 +55,7 @@ void updateTomatoCounter()
     tomato_counter.fillCanvas(11);
 
     tomato_counter.setTextSize(64);
-    tomato_counter.setTextColor(0,11);
+    tomato_counter.setTextColor(0, 11);
 
     tomato_counter.drawString("Tomatoes: " + String(completed_tomatoes), 260, 65);
 
@@ -50,11 +63,13 @@ void updateTomatoCounter()
 
     uint32_t batteryVoltageMV = M5.getBatteryVoltage();
     String batteryText;
-    if (batteryVoltageMV > 4250) {
+    if (batteryVoltageMV > 4250)
+    {
         batteryText = "USB";
     }
-    else {
-        uint32_t batteryPercentageClamped = constrain((batteryVoltageMV - 3500)/6, 0, 100);
+    else
+    {
+        uint32_t batteryPercentageClamped = constrain((batteryVoltageMV - 3500) / 6, 0, 100);
         batteryText = String(batteryPercentageClamped) + "%";
     }
 
@@ -81,10 +96,9 @@ void setTimerStr()
 
     int s = timer_seconds % 60;
 
-    int m = ((timer_seconds - s)/60) % 60;
+    int m = ((timer_seconds - s) / 60) % 60;
     sprintf(buffer, "%02d:%02d", m, s);
     timer_str = String(buffer);
-
 }
 
 void stopTimer()
@@ -94,12 +108,12 @@ void stopTimer()
     btns[KEY_START]->Draw();
 }
 
-void resetTimer()
+void resetTimer(bool updateCanvas = false)
 {
     stopTimer();
-    timer_seconds = TIMER_DURATION;
+    timer_seconds = timer_duration;
     setTimerStr();
-    updateValue();
+    updateValue(updateCanvas);
 }
 
 void decreaseCountdownTimer()
@@ -107,7 +121,8 @@ void decreaseCountdownTimer()
     timer_seconds--;
     setTimerStr();
     updateValue();
-    if (timer_seconds == 0) {
+    if (timer_seconds == 0)
+    {
         stopTimer();
         increaseCompletedTomatoes();
     }
@@ -116,11 +131,13 @@ void decreaseCountdownTimer()
 void startTimer()
 {
     btns[KEY_START]->setLabel("PAUSE");
-    if (timer_seconds == 0) {
+    if (timer_seconds == 0)
+    {
         resetTimer();
         M5.EPD.UpdateFull(UPDATE_MODE_GL16);
     }
-    else {
+    else
+    {
         btns[KEY_START]->Draw();
     }
 
@@ -130,13 +147,17 @@ void startTimer()
 void onResetTimerPress(epdgui_args_vector_t &args)
 {
     // gotta check this first because it gets reset in "resetTimer"
-    bool resetTomatoes = timer_seconds == TIMER_DURATION;
+    bool resetTomatoes = timer_seconds == timer_duration;
 
     resetTimer();
 
     if (resetTomatoes)
     {
         resetCompletedTomatoes();
+    }
+    else
+    {
+        M5.EPD.UpdateFull(UPDATE_MODE_GL16);
     }
 }
 
@@ -177,7 +198,7 @@ void setup()
     canvas_result.createCanvas(516, 276);
     canvas_result.loadFont(binaryttf, sizeof(binaryttf));
     canvas_result.createRender(36, 14);
-    for(int i = DEFAULT_FONT_SIZE; i >= 8; i-= 8)
+    for (int i = DEFAULT_FONT_SIZE; i >= 8; i -= 8)
     {
         canvas_result.createRender(i, 14);
         canvas_result.setTextSize(i);
@@ -193,7 +214,7 @@ void setup()
     tomato_counter.loadFont(binaryttf, sizeof(binaryttf));
     tomato_counter.createRender(36, 14);
 
-    for(int i = DEFAULT_FONT_SIZE; i >= 8; i-= 8)
+    for (int i = DEFAULT_FONT_SIZE; i >= 8; i -= 8)
     {
         tomato_counter.createRender(i, 14);
         tomato_counter.setTextSize(i);
@@ -208,9 +229,32 @@ void setup()
     creatKeys();
     resetTimer();
     resetCompletedTomatoes();
+
+    EPDGUI_Draw(UPDATE_MODE_NONE);
+    M5.EPD.UpdateFull(UPDATE_MODE_GC16);
 }
 
 void loop()
 {
     EPDGUI_Run();
+
+    if (M5.BtnL.isPressed())
+    {
+        // if timer isn't running, basically
+        if (timer_seconds == timer_duration) {
+            increaseTimerDuration();
+            resetTimer(true);
+        } else {
+
+        }
+
+    }
+    if (M5.BtnR.isPressed())
+    {
+        // if timer isn't running, basically
+        if (timer_seconds == timer_duration) {
+            decreaseTimerDuration();
+            resetTimer(true);
+        }
+    }
 }
